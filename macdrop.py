@@ -54,6 +54,7 @@ def base_run_cmd(runtime):
     if os.path.isdir(home_projects):
         cmd += [
             "-v", f"{home_projects}:/Projects",
+            "-w", "/Projects"
         ]
 
     return cmd
@@ -63,9 +64,9 @@ def run_setup(runtime):
     print("Running macdrop setup inside container")
 
     setup_cmd = (
-        "apk add bash sudo fish ;"
-        "docker network create traefik-public ;"
-        "docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:latest ;"
+        "apk add bash sudo fish && "
+        "docker network create traefik-public && "
+        "docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:latest && "
         "l3d reset"
     )
 
@@ -83,9 +84,13 @@ def run_setup(runtime):
 def start(runtime):
     print(f"Starting {NAME} using {runtime}")
 
-    subprocess.check_call(
-        base_run_cmd(runtime) + [IMAGE]
-    )
+    try:
+        subprocess.check_call(base_run_cmd(runtime) + [IMAGE])
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to start container '{NAME}' using {runtime}.", file=sys.stderr)
+        print(f"Return code: {e.returncode}", file=sys.stderr)
+        print("Make sure the runtime is installed, the image exists, and no container with this name is running.", file=sys.stderr)
+        sys.exit(e.returncode)
 
     run_setup(runtime)
 
