@@ -84,7 +84,12 @@ def start(runtime):
     print(f"Starting {NAME} using {runtime}")
 
     try:
-        subprocess.check_call(base_run_cmd(runtime) + [IMAGE])
+        subprocess.run(
+            base_run_cmd(runtime) + [IMAGE],
+            check=True,
+            stdout=None,  # None means inherit parent stdout
+            stderr=None,  # None means inherit parent stderr
+        )
     except subprocess.CalledProcessError as e:
         print(f"Failed to start container '{NAME}' using {runtime}.", file=sys.stderr)
         print(f"Return code: {e.returncode}", file=sys.stderr)
