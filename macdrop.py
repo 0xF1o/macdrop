@@ -6,7 +6,6 @@ import shutil
 import subprocess
 import sys
 
-# Defaults (override via MACDROP_*)
 NAME = os.environ.get("MACDROP_NAME", "macdrop")
 IMAGE = os.environ.get("MACDROP_IMAGE", "docker:dind")
 PLATFORM = os.environ.get("MACDROP_PLATFORM", "linux/amd64")
@@ -103,7 +102,7 @@ def stop(runtime):
     subprocess.run([runtime, "rm", "-f", NAME], check=False)
 
 
-def shell(runtime):
+def shell(runtime, cmdparam):
     uid = os.getuid()
     gid = os.getgid()
     shelluser = os.environ.get("MACDROP_SHELLUSER", f"{uid}:{gid}")
@@ -113,14 +112,14 @@ def shell(runtime):
         "-it",
         "-u", shelluser,
         NAME,
-        SHELL
+        cmdparam
     ]    
     proc = subprocess.run(cmd)
     sys.exit(proc.returncode)
 
 
 def main():
-    runtime = find_runtime()
+    runtime = os.environ.get("MACDROP_RUNTIME", find_runtime())
     if not runtime:
         print(
             "Error: No container runtime found",
@@ -144,7 +143,7 @@ def main():
     elif args.command == "stop":
         stop(runtime)
     elif args.command == "shell":
-        shell(runtime)
+        shell(runtime, SHELL)
 
 
 if __name__ == "__main__":
