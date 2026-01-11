@@ -111,10 +111,9 @@ def shell(runtime, cmdparam):
         "exec",
         "-it",
         "-u", shelluser,
-        NAME,
-        cmdparam
+        NAME        
     ]    
-    proc = subprocess.run(cmd)
+    proc = subprocess.run(cmd + cmdparam)
     sys.exit(proc.returncode)
 
 
@@ -137,8 +136,7 @@ def l3d(runtime, args):
     if args:
         cmdstr += " " + " ".join(args)
 
-    print(f"Running inside container '{NAME}': {cmdstr}")
-    shell(runtime, cmdstr)
+    shell(runtime, ["/bin/sh", "-c", cmdstr])
 
 
 
@@ -172,7 +170,7 @@ def main():
     elif args.command == "stop":
         stop(runtime)
     elif args.command == "shell":
-        shell(runtime, SHELL)
+        shell(runtime, [SHELL])
     elif args.command == "l3d":
         l3d(runtime, args.cmd_args)
 
