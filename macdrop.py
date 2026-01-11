@@ -51,6 +51,11 @@ def base_run_cmd(runtime):
             "-w", "/Projects"
         ]
 
+    # Persist Docker cache in ~/.macdropcache
+    macdrop_cache = os.path.expanduser("~/.macdropcache")
+    os.makedirs(macdrop_cache, exist_ok=True)
+    cmd += ["-v", f"{macdrop_cache}:/var/lib/docker"]
+
     return cmd
 
 
