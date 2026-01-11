@@ -12,6 +12,7 @@ IMAGE = os.environ.get("MACDROP_IMAGE", "docker:dind")
 PLATFORM = os.environ.get("MACDROP_PLATFORM", "linux/amd64")
 PORT = os.environ.get("MACDROP_PORT", "8000:8000")
 SHELL = os.environ.get("MACDROP_SHELL", "fish")
+CACHEVOLUME = os.environ.get("MACDROP_CACHEVOLUME", "macdropcache")
 
 
 def find_runtime():
@@ -50,23 +51,10 @@ def base_run_cmd(runtime):
             "-v", f"{home_projects}:/Projects",
             "-w", "/Projects"
         ]
-
-    #TODO
-#    # Persist cache
-#    macdrop_cache = os.path.expanduser("~/.macdropcache")
-#
-#    if not os.path.exists(macdrop_cache):
-#        print(f"Creating cache directory at {macdrop_cache} and populating from image")
-#        os.makedirs(macdrop_cache)
-#        subprocess.check_call([
-#            runtime, "run", "--rm",
-#            "-v", f"{macdrop_cache}:/cache",  # mount host cache temporarily
-#            IMAGE,
-#            "/bin/sh", "-c",
-#            "cp -va /var/lib/docker/. /cache/"
-#        ])
-#         
-#    cmd += ["-v", f"{macdrop_cache}:/var/lib/docker"]
+        
+    if len(CACHEVOLUME) > 0:
+        subprocess.run([runtime, "volume", "create", CACHEVOLUME], check=False)
+        cmd += ["-v", f"{CACHEVOLUME}:/var/lib/docker"]
 
     return cmd
 
