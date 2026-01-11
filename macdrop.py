@@ -15,12 +15,6 @@ SHELL = os.environ.get("MACDROP_SHELL", "fish")
 
 
 def find_runtime():
-    """
-    Preference order:
-    1. container (Apple)
-    2. docker
-    3. podman
-    """
     for cmd in ("container", "docker", "podman"):
         if shutil.which(cmd):
             return cmd
