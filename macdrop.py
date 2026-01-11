@@ -61,7 +61,7 @@ def run_setup(runtime):
         "apk add bash sudo fish && "
         "docker network create traefik-public && "
         "docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:latest && "
-        "l3d reset"
+        "l3d reset || true"
     )
 
     subprocess.check_call([
