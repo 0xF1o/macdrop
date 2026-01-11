@@ -111,7 +111,7 @@ def shell(runtime):
         runtime,
         "exec",
         "-it",
-        "-u", shelluser
+        "-u", shelluser,
         NAME,
         SHELL
     ]    
