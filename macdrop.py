@@ -54,7 +54,7 @@ def base_run_cmd(runtime):
     # Persist cache
     macdrop_cache = os.path.expanduser("~/.macdropcache")
 
-     if not os.path.exists(macdrop_cache):
+    if not os.path.exists(macdrop_cache):
         print(f"Creating cache directory at {macdrop_cache} and populating from image")
         os.makedirs(macdrop_cache)
         subprocess.check_call([
