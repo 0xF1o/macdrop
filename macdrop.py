@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 NAME = os.environ.get("MACDROP_NAME", "macdrop")
-IMAGE = os.environ.get("MACDROP_IMAGE", "docker:dind")
+IMAGE = os.environ.get("MACDROP_IMAGE", "docker:29-dind")
 PLATFORM = os.environ.get("MACDROP_PLATFORM", "linux/amd64")
 PORT = os.environ.get("MACDROP_PORT", "8000:8000")
 SHELL = os.environ.get("MACDROP_SHELL", "fish")
@@ -20,6 +20,10 @@ def find_runtime():
             return cmd
     return None
 
+def get_shelluser():
+    uid = os.getuid()
+    gid = os.getgid()
+    return os.environ.get("MACDROP_SHELLUSER", f"{uid}:{gid}")
 
 def base_run_cmd(runtime):
     cmd = [
@@ -29,6 +33,7 @@ def base_run_cmd(runtime):
         "--name", NAME,
         "--platform", PLATFORM,
         "-p", PORT,
+        "-u", get_shelluser()
     ]
 
     # docker / podman require privileged for dind
@@ -103,9 +108,7 @@ def stop(runtime):
 
 
 def shell(runtime, cmdparam):
-    uid = os.getuid()
-    gid = os.getgid()
-    shelluser = os.environ.get("MACDROP_SHELLUSER", f"{uid}:{gid}")
+    shelluser = get_shelluser()
     cmd = [
         runtime,
         "exec",
