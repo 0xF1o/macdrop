@@ -20,10 +20,6 @@ def find_runtime():
             return cmd
     return None
 
-def get_shelluser():
-    uid = os.getuid()
-    gid = os.getgid()
-    return os.environ.get("MACDROP_SHELLUSER", f"{uid}:{gid}")
 
 def base_run_cmd(runtime):
     cmd = [
@@ -32,8 +28,7 @@ def base_run_cmd(runtime):
         "-d",
         "--name", NAME,
         "--platform", PLATFORM,
-        "-p", PORT,
-        "-u", get_shelluser()
+        "-p", PORT
     ]
 
     # docker / podman require privileged for dind
@@ -108,12 +103,10 @@ def stop(runtime):
 
 
 def shell(runtime, cmdparam):
-    shelluser = get_shelluser()
     cmd = [
         runtime,
         "exec",
         "-it",
-        "-u", shelluser,
         NAME        
     ]    
     proc = subprocess.run(cmd + cmdparam)
