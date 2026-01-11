@@ -51,9 +51,20 @@ def base_run_cmd(runtime):
             "-w", "/Projects"
         ]
 
-    # Persist Docker cache in ~/.macdropcache
+    # Persist cache
     macdrop_cache = os.path.expanduser("~/.macdropcache")
-    os.makedirs(macdrop_cache, exist_ok=True)
+
+     if not os.path.exists(macdrop_cache):
+        print(f"Creating cache directory at {macdrop_cache} and populating from image")
+        os.makedirs(macdrop_cache)
+        subprocess.check_call([
+            runtime, "run", "--rm",
+            "-v", f"{macdrop_cache}:/cache",  # mount host cache temporarily
+            IMAGE,
+            "/bin/sh", "-c",
+            "cp -va /var/lib/docker/. /cache/"
+        ])
+         
     cmd += ["-v", f"{macdrop_cache}:/var/lib/docker"]
 
     return cmd
