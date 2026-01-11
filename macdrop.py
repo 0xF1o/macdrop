@@ -93,7 +93,6 @@ def start(runtime):
     except subprocess.CalledProcessError as e:
         print(f"Failed to start container '{NAME}' using {runtime}.", file=sys.stderr)
         print(f"Return code: {e.returncode}", file=sys.stderr)
-        print("Make sure the runtime is installed, the image exists, and no container with this name is running.", file=sys.stderr)
         sys.exit(e.returncode)
 
     run_setup(runtime)
