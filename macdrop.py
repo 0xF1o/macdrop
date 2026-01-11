@@ -60,7 +60,7 @@ def base_run_cmd(runtime):
 
 
 def run_setup(runtime):
-    print("Running macdrop setup inside container???")
+    print("Running macdrop setup inside container")
 
     setup_cmd = (
         "docker network create traefik-public ;"
@@ -80,7 +80,7 @@ def run_setup(runtime):
 
 
 def start(runtime):
-    print(f"Starting {NAME} using {runtime}???")
+    print(f"Starting {NAME} using {runtime}")
 
     subprocess.check_call(
         base_run_cmd(runtime) + [IMAGE]
@@ -90,7 +90,7 @@ def start(runtime):
 
 
 def stop(runtime):
-    print(f"Stopping {NAME}???")
+    print(f"Stopping {NAME}")
     subprocess.run([runtime, "rm", "-f", NAME], check=False)
 
 
@@ -110,7 +110,7 @@ def main():
     runtime = find_runtime()
     if not runtime:
         print(
-            "Error: none of container, docker, or podman found",
+            "Error: No container runtime found",
             file=sys.stderr,
         )
         sys.exit(1)
