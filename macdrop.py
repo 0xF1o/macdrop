@@ -63,10 +63,9 @@ def run_setup(runtime):
     print("Running macdrop setup inside container")
 
     setup_cmd = (
-        "apk add bash sudo fish && "
-        "docker network create traefik-public && "
-        "docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:latest && "
-        "l3d reset || true"
+        "apk add bash sudo fish && docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:latest ; "
+        "docker network create traefik-public ; "
+        "l3d reset ; "
     )
 
     subprocess.check_call([
