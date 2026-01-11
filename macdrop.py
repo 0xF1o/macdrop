@@ -104,14 +104,18 @@ def stop(runtime):
 
 
 def shell(runtime):
-    proc = subprocess.run([
+    uid = os.getuid()
+    gid = os.getgid()
+    shelluser = os.environ.get("MACDROP_SHELLUSER", f"{uid}:{gid}")
+    cmd = [
         runtime,
         "exec",
         "-it",
+        "-u", shelluser
         NAME,
-        SHELL,
-    ])
-    # Propagate exact exit code
+        SHELL
+    ]    
+    proc = subprocess.run(cmd)
     sys.exit(proc.returncode)
 
 
