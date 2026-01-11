@@ -118,6 +118,30 @@ def shell(runtime, cmdparam):
     sys.exit(proc.returncode)
 
 
+def l3d(runtime, args):
+    """
+    Run 'l3d' inside the container from the current project directory.
+    """
+    home_projects = os.path.expanduser("~/Projects")
+    cwd = os.getcwd()
+
+    if not cwd.startswith(home_projects):
+        print("Error: You must run this command inside a project under ~/Projects.", file=sys.stderr)
+        sys.exit(1)
+
+    # Map current directory to container path
+    container_dir = "/Projects" + cwd[len(home_projects):]
+
+    # Build command string
+    cmdstr = f"cd '{container_dir}' && l3d"
+    if args:
+        cmdstr += " " + " ".join(args)
+
+    print(f"Running inside container '{NAME}': {cmdstr}")
+    shell(runtime, cmdstr)
+
+
+
 def main():
     runtime = os.environ.get("MACDROP_RUNTIME", find_runtime())
     if not runtime:
@@ -132,18 +156,25 @@ def main():
     )
     parser.add_argument(
         "command",
-        choices=["start", "stop", "shell"],
+        choices=["start", "stop", "shell", "l3d"],
         help="Action to perform",
+    )
+    parser.add_argument(
+        "cmd_args",
+        nargs=argparse.REMAINDER,
+        help="Optional arguments for command",
     )
 
     args = parser.parse_args()
-
+    
     if args.command == "start":
         start(runtime)
     elif args.command == "stop":
         stop(runtime)
     elif args.command == "shell":
         shell(runtime, SHELL)
+    elif args.command == "l3d":
+        l3d(runtime, args.cmd_args)
 
 
 if __name__ == "__main__":
