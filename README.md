@@ -1,6 +1,6 @@
 # Macdrop
-Experimental tooling to support lakedrop on mac
-Depends on [apple/container](https://github.com/apple/container/releases)
+Experimental tooling to support lakedrop on mac  
+Depends on [apple/container](https://github.com/apple/container/releases)  
 May work on other platforms too that have python3 and podman/docker
 
 ## Install/Update
