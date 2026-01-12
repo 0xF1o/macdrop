@@ -62,7 +62,8 @@ def run_setup(runtime):
     print("Running macdrop setup inside container")
 
     setup_cmd = (
-        "apk add bash sudo fish ; "
+        "apk add bash sudo fish tzdata ; "
+        "cp /usr/share/zoneinfo/UTC /etc/localtime ; "
         "until docker info >/dev/null 2>&1; do echo 'Waiting for Docker...'; sleep 2; done; "
         "docker network create traefik-public ; "
         "docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:latest"
