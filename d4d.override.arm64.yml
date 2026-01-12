@@ -1,0 +1,13 @@
+services:
+  mariadb:
+    platform: 'linux/arm64'
+  mariadbtest:
+    platform: 'linux/arm64'
+  php:
+    platform: 'linux/arm64'
+  nginx:
+    platform: 'linux/arm64'
+  redis:
+    platform: 'linux/arm64'
+  mailpit:
+    platform: 'linux/arm64'
