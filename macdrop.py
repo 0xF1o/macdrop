@@ -10,7 +10,6 @@ NAME = os.environ.get("MACDROP_NAME", "macdrop")
 IMAGE = os.environ.get("MACDROP_IMAGE", "docker:29-dind")
 PLATFORM = os.environ.get("MACDROP_PLATFORM", "linux/amd64")
 PORT = os.environ.get("MACDROP_PORT", "8000:8000")
-SHELL = os.environ.get("MACDROP_SHELL", "fish")
 CACHEVOLUME = os.environ.get("MACDROP_CACHEVOLUME", "macdropcache")
 
 
@@ -62,7 +61,7 @@ def run_setup(runtime):
     print("Running macdrop setup inside container")
 
     setup_cmd = (
-        "apk add bash sudo fish tzdata ; "
+        "apk add bash sudo tzdata ; "
         "cp /usr/share/zoneinfo/UTC /etc/localtime ; "
         "until docker info >/dev/null 2>&1; do echo 'Waiting for Docker...'; sleep 2; done; "
         "docker network create traefik-public ; "
@@ -167,7 +166,7 @@ def main():
     elif args.command == "stop":
         stop(runtime)
     elif args.command == "shell":
-        shell(runtime, [SHELL])
+        shell(runtime, ["bash"])
     elif args.command == "l3d":
         l3d(runtime, args.cmd_args)
 
