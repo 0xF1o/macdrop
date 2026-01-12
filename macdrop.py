@@ -11,6 +11,7 @@ IMAGE = os.environ.get("MACDROP_IMAGE", "docker:29-dind")
 PLATFORM = os.environ.get("MACDROP_PLATFORM", "linux/amd64")
 PORT = os.environ.get("MACDROP_PORT", "8000:8000")
 CACHEVOLUME = os.environ.get("MACDROP_CACHEVOLUME", "macdropcache")
+SETUPVERSION = os.environ.get("MACDROP_SETUPVERSION", "latest")
 
 
 def find_runtime():
@@ -65,7 +66,7 @@ def run_setup(runtime):
         "cp /usr/share/zoneinfo/UTC /etc/localtime ; "
         "until docker info >/dev/null 2>&1; do echo 'Waiting for Docker...'; sleep 2; done; "
         "docker network create traefik-public ; "
-        "docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:latest"
+        "docker run -v /usr/local/bin:/setup --rm registry.lakedrops.com/docker/l3d/setup:" + SETUPVERSION
     )
 
     subprocess.check_call([
