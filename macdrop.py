@@ -152,8 +152,8 @@ def shell(runtime, cmdparam):
 
 
 def l3d(runtime, args):
-    home_projects = os.path.expanduser("~/Projects")
-    cwd = os.getcwd()
+    home_projects = os.path.expanduser("~/Projects").replace('\\','/')
+    cwd = os.getcwd().replace('\\','/')
 
     if not cwd.startswith(home_projects):
         print("Error: You must run this command inside a project under ~/Projects.", file=sys.stderr)
