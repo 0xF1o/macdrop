@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 
 __commit__ = "unknown"
 NAME = os.environ.get("MACDROP_NAME", "macdrop")
@@ -22,6 +23,30 @@ def find_runtime():
     return None
 
 
+def run_commands_with_retry(commands, retries=2, delay=1):
+    """
+    Execute a list of commands.
+    Each command is retried `retries` times on failure.
+    After retries are exhausted, continue with the next command.
+    """
+    for cmd in commands:
+        attempt = 0
+        while attempt <= retries:
+            try:
+                print(f"Running: {' '.join(cmd)} (attempt {attempt + 1})")
+                subprocess.run(cmd, check=True)
+                break
+            except subprocess.CalledProcessError as e:
+                attempt += 1
+                if attempt > retries:
+                    print(
+                        f"Command failed after {retries + 1} attempts, continuing: {' '.join(cmd)}",
+                        file=sys.stderr,
+                    )
+                else:
+                    time.sleep(delay)
+
+
 def base_run_cmd(runtime):
     cmd = [
         runtime,
@@ -32,11 +57,9 @@ def base_run_cmd(runtime):
         "-p", PORT
     ]
 
-    # docker / podman require privileged for dind
     if runtime in ("docker", "podman"):
         cmd.append("--privileged")
 
-    # SSH agent passthrough if available
     ssh_auth_sock = os.environ.get("SSH_AUTH_SOCK")
     if ssh_auth_sock and os.path.exists(ssh_auth_sock):
         cmd += [
@@ -44,14 +67,13 @@ def base_run_cmd(runtime):
             "-v", f"{ssh_auth_sock}:/ssh-agent",
         ]
 
-    # Map ~/Projects -> /Projects if it exists
     home_projects = os.path.expanduser("~/Projects")
     if os.path.isdir(home_projects):
         cmd += [
             "-v", f"{home_projects}:/Projects",
             "-w", "/Projects"
         ]
-        
+
     if len(CACHEVOLUME) > 0:
         subprocess.run([runtime, "volume", "create", CACHEVOLUME], check=False)
         cmd += ["-v", f"{CACHEVOLUME}:/var/lib/docker"]
@@ -89,12 +111,9 @@ def start(runtime):
         subprocess.run(
             base_run_cmd(runtime) + [IMAGE],
             check=True,
-            stdout=None,  # None means inherit parent stdout
-            stderr=None,  # None means inherit parent stderr
         )
     except subprocess.CalledProcessError as e:
         print(f"Failed to start container '{NAME}' using {runtime}.", file=sys.stderr)
-        print(f"Return code: {e.returncode}", file=sys.stderr)
         sys.exit(e.returncode)
 
     run_setup(runtime)
@@ -105,21 +124,34 @@ def stop(runtime):
     subprocess.run([runtime, "rm", "-f", NAME], check=False)
 
 
+def container_reset(runtime):
+    if runtime != "container":
+        print("container-reset is only supported when runtime=container", file=sys.stderr)
+        sys.exit(1)
+
+    print("Resetting container runtime")
+
+    commands = [
+        ["container", "system", "stop"],
+        ["container", "system", "start"],
+        ["container", "rm", "-f", "--all"],
+    ]
+
+    run_commands_with_retry(commands)
+
+
 def shell(runtime, cmdparam):
     cmd = [
         runtime,
         "exec",
         "-it",
-        NAME        
-    ]    
+        NAME
+    ]
     proc = subprocess.run(cmd + cmdparam)
     sys.exit(proc.returncode)
 
 
 def l3d(runtime, args):
-    """
-    Run 'l3d' inside the container from the current project directory.
-    """
     home_projects = os.path.expanduser("~/Projects")
     cwd = os.getcwd()
 
@@ -127,10 +159,8 @@ def l3d(runtime, args):
         print("Error: You must run this command inside a project under ~/Projects.", file=sys.stderr)
         sys.exit(1)
 
-    # Map current directory to container path
     container_dir = "/Projects" + cwd[len(home_projects):]
 
-    # Build command string
     cmdstr = f"cd '{container_dir}' && l3d"
     if args:
         cmdstr += " " + " ".join(args)
@@ -138,14 +168,10 @@ def l3d(runtime, args):
     shell(runtime, ["/bin/sh", "-c", cmdstr])
 
 
-
 def main():
     runtime = os.environ.get("MACDROP_RUNTIME", find_runtime())
     if not runtime:
-        print(
-            "Error: No container runtime found",
-            file=sys.stderr,
-        )
+        print("Error: No container runtime found", file=sys.stderr)
         sys.exit(1)
 
     parser = argparse.ArgumentParser(
@@ -153,7 +179,7 @@ def main():
     )
     parser.add_argument(
         "command",
-        choices=["start", "stop", "shell", "l3d"],
+        choices=["start", "stop", "shell", "l3d", "container-reset"],
         help="Action to perform",
     )
     parser.add_argument(
@@ -163,7 +189,7 @@ def main():
     )
 
     args = parser.parse_args()
-    
+
     if args.command == "start":
         start(runtime)
     elif args.command == "stop":
@@ -172,8 +198,9 @@ def main():
         shell(runtime, ["bash"])
     elif args.command == "l3d":
         l3d(runtime, args.cmd_args)
+    elif args.command == "container-reset":
+        container_reset(runtime)
 
 
 if __name__ == "__main__":
     main()
-
