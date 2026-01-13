@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 
+__commit__ = "unknown"
 NAME = os.environ.get("MACDROP_NAME", "macdrop")
 IMAGE = os.environ.get("MACDROP_IMAGE", "docker:29-dind")
 PLATFORM = os.environ.get("MACDROP_PLATFORM", "linux/amd64")
