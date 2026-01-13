@@ -5,5 +5,5 @@ May work on other platforms too that have python3 and podman/docker.
 
 ## Install/Update
 ```sh
-sudo curl -o /usr/local/bin/macdrop https://0xf1o.github.io/macdrop/macdrop.py && sudo chmod +x /usr/local/bin/macdrop
+sudo curl -o /usr/local/bin/macdrop https://raw.githubusercontent.com/0xF1o/macdrop/refs/heads/main/macdrop.py && sudo chmod +x /usr/local/bin/macdrop
 ```
